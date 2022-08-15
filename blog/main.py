@@ -18,7 +18,7 @@ def get_db():
     finally:
         db.close()
 
-@app.post('/blog', status_code=status.HTTP_201_CREATED)
+@app.post('/blog', status_code=status.HTTP_201_CREATED, tags=['blogs'])
 def create(request: schemas.Blog, db: Session = Depends(get_db)):
     new_blog = models.Blog(title=request.title, body=request.body)
     db.add(new_blog)
@@ -26,7 +26,7 @@ def create(request: schemas.Blog, db: Session = Depends(get_db)):
     db.refresh(new_blog)
     return new_blog
 
-@app.put('/blog/{id}', status_code=status.HTTP_202_ACCEPTED)
+@app.put('/blog/{id}', status_code=status.HTTP_202_ACCEPTED, tags=['blogs'])
 def update(id, request: schemas.Blog, db: Session = Depends(get_db)):
     blog = db.query(models.Blog).filter(models.Blog.id == id)
     if not blog.first():
@@ -35,12 +35,12 @@ def update(id, request: schemas.Blog, db: Session = Depends(get_db)):
     db.commit()
     return {'detail': 'success'}
 
-@app.get('/blog', status_code=status.HTTP_200_OK, response_model=List[schemas.ShowBlog])
+@app.get('/blog', status_code=status.HTTP_200_OK, response_model=List[schemas.ShowBlog], tags=['blogs'])
 def get_all(db: Session = Depends(get_db)):
     blogs = db.query(models.Blog).all()
     return blogs
 
-@app.get('/blog/{id}', status_code=status.HTTP_200_OK, response_model=schemas.ShowBlog)
+@app.get('/blog/{id}', status_code=status.HTTP_200_OK, response_model=schemas.ShowBlog, tags=['blogs'])
 def get_by_id(id, db: Session = Depends(get_db)):
     blog = db.query(models.Blog).filter(models.Blog.id == id).first()
     if not blog:
@@ -52,7 +52,7 @@ def get_by_id(id, db: Session = Depends(get_db)):
         # return {'detail': f'Blog with {id} is not available'}
     return blog
 
-@app.delete('/blog/{id}', status_code=status.HTTP_204_NO_CONTENT)
+@app.delete('/blog/{id}', status_code=status.HTTP_204_NO_CONTENT, tags=['blogs'])
 def destroy(id, db: Session = Depends(get_db)):
     blog = db.query(models.Blog).filter(models.Blog.id == id)
     if not blog.first():
@@ -61,7 +61,7 @@ def destroy(id, db: Session = Depends(get_db)):
     db.commit()
     return {'detail': 'success'}
 
-@app.post('/user', response_model=schemas.ShowUser)
+@app.post('/user', response_model=schemas.ShowUser, tags=['users'])
 def create_user(request: schemas.User, db: Session = Depends(get_db)):
     hashed_pwd = Hash.encrypt(request.password)
     new_user = models.User(name=request.name, email=request.email, password=hashed_pwd)
@@ -70,7 +70,7 @@ def create_user(request: schemas.User, db: Session = Depends(get_db)):
     db.refresh(new_user)
     return new_user
 
-@app.get("/user/{id}", response_model=schemas.ShowUser)
+@app.get("/user/{id}", response_model=schemas.ShowUser, tags=['users'])
 def get_user_by_id(id: int, db: Session = Depends(get_db)):
     user = db.query(models.User).filter(models.User.id == id).first()
     if not user:
