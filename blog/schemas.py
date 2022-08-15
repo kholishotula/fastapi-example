@@ -29,3 +29,7 @@ class ShowBlog(BaseModel):
 
     class Config():
         orm_mode = True
+
+class Login(BaseModel):
+    username: str # jwt need username for identifier, not email
+    password: str
