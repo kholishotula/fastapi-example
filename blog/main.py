@@ -1,3 +1,4 @@
+import email
 from typing import List
 from fastapi import FastAPI, Depends, status, HTTPException
 from . import schemas, models
@@ -57,3 +58,11 @@ def destroy(id, db: Session = Depends(get_db)):
     blog.delete(synchronize_session=False)
     db.commit()
     return {'detail': 'success'}
+
+@app.post('/user')
+def create_user(request: schemas.User, db: Session = Depends(get_db)):
+    new_user = models.User(name=request.name, email=request.email, password=request.password)
+    db.add(new_user)
+    db.commit()
+    db.refresh(new_user)
+    return new_user
