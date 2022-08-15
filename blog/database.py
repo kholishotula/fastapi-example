@@ -9,3 +9,10 @@ engine = create_engine(SQLALCHEMY_DB_URL, connect_args={"check_same_thread": Fal
 SessionLocal = sessionmaker(bind=engine, autocommit=False, autoflush=False)
 
 Base = declarative_base()
+
+def get_db():
+    db = SessionLocal()
+    try:
+        yield db
+    finally:
+        db.close()
