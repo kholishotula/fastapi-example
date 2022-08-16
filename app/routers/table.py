@@ -1,8 +1,8 @@
 from fastapi import APIRouter, Depends
-from app import schemas, database, models
+from app import schemas
 from sqlalchemy.orm import Session
 from app.database import get_mysql_db
-from fastapi.encoders import jsonable_encoder
+from app.repository import table
 
 router = APIRouter(
     prefix="/table",
@@ -11,10 +11,7 @@ router = APIRouter(
 
 @router.post('/')
 async def create_new_table(request: schemas.Table, db: Session = Depends(get_mysql_db)):
-    new_table = models.Table(description=request.description, status=request.status)
-    db.add(new_table)
-    db.commit()
-    db.refresh(new_table)
+    new_table = table.create(request, db)
 
     if new_table.id:
         return{
@@ -29,7 +26,7 @@ async def create_new_table(request: schemas.Table, db: Session = Depends(get_mys
 
 @router.get('/')
 async def get_all_table(db: Session = Depends(get_mysql_db)):
-    tables = db.query(models.Table).all()
+    tables = table.get_all(db)
     return {
         "success": True,
         "data": tables
@@ -37,46 +34,42 @@ async def get_all_table(db: Session = Depends(get_mysql_db)):
 
 @router.get('/{id}')
 async def get_table_by_id(id: int, db: Session = Depends(get_mysql_db)):
-    table = db.query(models.Table).filter(models.Table.id == id).first()
-    if not table:
+    foundTable = table.get_by_id(id, db)
+    if not foundTable:
         return {
             "success": False,
             "message": "Not Found"
         }
     return {
         "success": True,
-        "data": table
+        "data": foundTable
     }
 
 @router.put('/{id}')
 async def update_table_by_id(id: int, request: schemas.Table, db: Session = Depends(get_mysql_db)):
-    table = db.query(models.Table).filter(models.Table.id == id)
+    updatedTable = table.update(id, request, db)
 
-    if not table.first():
+    if updatedTable == "Not Found":
         return {
             "success": False,
             "message": "Not Found"
         }
 
-    table.update(request.dict())
-    db.commit()
     return {
         "success": True,
-        "data": table.first()
+        "data": updatedTable
     }
 
 @router.delete('/{id}')
 async def delete_table_by_id(id: int, db: Session = Depends(get_mysql_db)):
-    table = db.query(models.Table).filter(models.Table.id == id)
+    result = table.destroy(id, db)
 
-    if not table.first():
+    if result == "Not Found":
         return {
             "success": False,
             "message": "Not Found"
         }
 
-    table.delete(synchronize_session=False)
-    db.commit()
     return {
         "success": True
     }
