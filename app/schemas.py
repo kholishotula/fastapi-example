@@ -40,3 +40,7 @@ class Token(BaseModel):
 
 class TokenData(BaseModel):
     email: Optional[str] = None
+
+class Table(BaseModel):
+    description: str
+    status: bool

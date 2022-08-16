@@ -1,5 +1,5 @@
-from app.database import Base
-from sqlalchemy import Column, Integer, String, ForeignKey
+from app.database import Base, mysql_meta
+from sqlalchemy import Table, Column, Integer, String, Boolean, ForeignKey
 from sqlalchemy.orm import relationship
 
 class Blog(Base):
@@ -20,3 +20,10 @@ class User(Base):
     email = Column(String)
     password = Column(String)
     blogs = relationship("Blog", back_populates="author")
+
+table = Table(
+    'tables', mysql_meta,
+    Column('id', Integer, primary_key=True, index=True),
+    Column('description', String),
+    Column('status', Boolean)
+)
