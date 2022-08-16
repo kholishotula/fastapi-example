@@ -1,7 +1,7 @@
 from fastapi import APIRouter, Depends
-from .. import schemas, database
+from app import schemas, database
 from sqlalchemy.orm import Session
-from ..repository import user
+from app.repository import user
 
 get_db = database.get_db
 
