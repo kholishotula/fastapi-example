@@ -1,4 +1,3 @@
-from msilib import schema
 from app import schemas, models
 from sqlalchemy.orm import Session
 

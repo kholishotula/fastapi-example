@@ -3,7 +3,7 @@ from app import schemas, database
 from sqlalchemy.orm import Session
 from app.repository import user
 
-get_db = database.get_db
+get_db = database.get_mysql_db
 
 router = APIRouter(
     prefix="/user",
