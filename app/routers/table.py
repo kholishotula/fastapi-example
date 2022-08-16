@@ -1,7 +1,8 @@
-from msilib.schema import tables
-from unittest import result
-from fastapi import APIRouter
+from fastapi import APIRouter, Depends
 from app import schemas, database, models
+from sqlalchemy.orm import Session
+from app.database import get_mysql_db
+from fastapi.encoders import jsonable_encoder
 
 router = APIRouter(
     prefix="/table",
@@ -9,15 +10,13 @@ router = APIRouter(
 )
 
 @router.post('/')
-async def create_new_table(request: schemas.Table):
-    result = database.mysql_conn.execute(models.table.insert().values(
-        description=request.description,
-        status=request.status
-    ))
+async def create_new_table(request: schemas.Table, db: Session = Depends(get_mysql_db)):
+    new_table = models.Table(description=request.description, status=request.status)
+    db.add(new_table)
+    db.commit()
+    db.refresh(new_table)
 
-    if result.is_insert:
-        new_table = database.mysql_conn.execute(models.table.select().order_by(models.table.c.id.desc())).fetchone()
-
+    if new_table.id:
         return{
             "success": True,
             "data": new_table
@@ -29,16 +28,16 @@ async def create_new_table(request: schemas.Table):
         }
 
 @router.get('/')
-async def get_all_table():
-    tables = database.mysql_conn.execute(models.table.select()).fetchall()
+async def get_all_table(db: Session = Depends(get_mysql_db)):
+    tables = db.query(models.Table).all()
     return {
         "success": True,
         "data": tables
     }
 
 @router.get('/{id}')
-async def get_table_by_id(id: int):
-    table = database.mysql_conn.execute(models.table.select().where(models.table.c.id == id)).fetchone()
+async def get_table_by_id(id: int, db: Session = Depends(get_mysql_db)):
+    table = db.query(models.Table).filter(models.Table.id == id).first()
     if not table:
         return {
             "success": False,
@@ -50,35 +49,34 @@ async def get_table_by_id(id: int):
     }
 
 @router.put('/{id}')
-async def update_table_by_id(id: int, request: schemas.Table):
-    result = database.mysql_conn.execute(models.table.update().values(
-        description=request.description,
-        status=request.status
-    ).where(models.table.c.id == id))
+async def update_table_by_id(id: int, request: schemas.Table, db: Session = Depends(get_mysql_db)):
+    table = db.query(models.Table).filter(models.Table.id == id)
 
-    if not result:
+    if not table.first():
         return {
             "success": False,
-            "message": "Internal Server Error"
+            "message": "Not Found"
         }
 
-    updated_table = database.mysql_conn.execute(models.table.select().where(models.table.c.id == id)).fetchone()
-
+    table.update(request.dict())
+    db.commit()
     return {
         "success": True,
-        "data": updated_table
+        "data": table.first()
     }
 
 @router.delete('/{id}')
-async def delete_table_by_id(id: int):
-    result = database.mysql_conn.execute(models.table.delete().where(models.table.c.id == id))
+async def delete_table_by_id(id: int, db: Session = Depends(get_mysql_db)):
+    table = db.query(models.Table).filter(models.Table.id == id)
 
-    if not result:
+    if not table.first():
         return {
             "success": False,
-            "message": "Internal Server Error"
+            "message": "Not Found"
         }
 
+    table.delete(synchronize_session=False)
+    db.commit()
     return {
         "success": True
     }

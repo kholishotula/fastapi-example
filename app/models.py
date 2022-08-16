@@ -1,13 +1,13 @@
-from app.database import Base, mysql_meta
-from sqlalchemy import Table, Column, Integer, String, Boolean, ForeignKey
+from app.database import Base
+from sqlalchemy import Column, Integer, String, Boolean, ForeignKey
 from sqlalchemy.orm import relationship
 
 class Blog(Base):
     __tablename__ = 'blogs'
 
     id = Column(Integer, primary_key=True, index=True)
-    title = Column(String)
-    body = Column(String)
+    title = Column(String(100))
+    body = Column(String(100))
     user_id = Column(Integer, ForeignKey('users.id'))
 
     author = relationship("User", back_populates="blogs")
@@ -16,14 +16,14 @@ class User(Base):
     __tablename__ = 'users'
 
     id = Column(Integer, primary_key=True, index=True)
-    name = Column(String)
-    email = Column(String)
-    password = Column(String)
+    name = Column(String(100))
+    email = Column(String(100))
+    password = Column(String(255))
     blogs = relationship("Blog", back_populates="author")
 
-table = Table(
-    'tables', mysql_meta,
-    Column('id', Integer, primary_key=True, index=True),
-    Column('description', String),
-    Column('status', Boolean)
-)
+class Table(Base):
+    __tablename__ = 'tables'
+
+    id = Column(Integer, primary_key=True, index=True)
+    description = Column(String(10))
+    status = Column(Boolean)
