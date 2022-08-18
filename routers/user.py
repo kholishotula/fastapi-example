@@ -2,9 +2,7 @@ from fastapi import APIRouter, Depends
 from app import schemas
 from sqlalchemy.orm import Session
 from repository import user_repository
-from config import database
-
-get_db = database.get_mysql_db
+from config.database import get_db
 
 router = APIRouter(
     prefix="/user",

@@ -12,7 +12,7 @@ router = APIRouter(
 )
 
 @router.post('/login')
-def login(request: OAuth2PasswordRequestForm = Depends(), db: Session = Depends(database.get_mysql_db)):
+def login(request: OAuth2PasswordRequestForm = Depends(), db: Session = Depends(database.get_db)):
     user = user_repository.get_by_email(request.username, db)
     if not Hash.verify(user.password, request.password):
         raise HTTPException(status_code=status.HTTP_401_UNAUTHORIZED, detail='Incorrect password')

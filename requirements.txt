@@ -1,7 +1,7 @@
-fastapi
-uvicorn
-pydantic
-sqlalchemy
-passlib
-python-jose
-pymysql
+fastapi # framework
+uvicorn # production deployment
+pydantic # model
+sqlalchemy # database orm
+passlib # hash
+python-jose # jwt
+pymysql # database mysql driver
