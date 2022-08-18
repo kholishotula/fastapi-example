@@ -5,3 +5,4 @@ sqlalchemy # database orm
 passlib # hash
 python-jose # jwt
 pymysql # database mysql driver
+pytest # unit test
